@@ -1,0 +1,16 @@
+main {
+    padding-top: 4rem;
+}
+
+#upload_photo_form {
+    margin: 10px 40% 10px 40%;
+    text-align: center;
+}
+
+#upload_photo_form input {
+    width: 100%;
+}
+
+.hidden {
+    display: none !important
+}
