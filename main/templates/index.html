@@ -5,7 +5,7 @@
 
 {% block main %}
     <section>
-        <form action="{% url "index" %}" method="POST" enctype="multipart/form-data">
+        <form action="{% url "index" %}" method="POST" enctype="multipart/form-data" id="upload_form">
             {% csrf_token %}
             <div class="container">
                 <div class="row">
@@ -32,19 +32,19 @@
                                     <i class="glyphicon glyphicon-download-alt"></i>
                                     <p>Choose an image file or drag it here.</p>
                                 </div>
-                                <input type="file" name="img_logo" class="dropzone" accept= image/* multiple>
+                                <input type="file" name="img_logo" class="dropzone" accept=image/* multiple>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary" disabled="disabled">
-                            <i class="fa fa-upload" aria-hidden="true"></i> Upload
-                        </button>
-                    </div>
-                </div>
+                <!--
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-primary" disabled="disabled">
+                                            <i class="fa fa-upload" aria-hidden="true"></i> Upload
+                                        </button>
+                                    </div>
+                                </div>-->
             </div>
         </form>
     </section>
@@ -53,14 +53,21 @@
 {% block scripts %}
     <script src="{% static "js/webdevtrick.js" %}"></script>
     <script>
+        let html = "";
+
         function readFile(input) {
-            let html = "";
+            //alert(html);
             let error = false;
-            if (input.files.length !== 3) {
+            if (input.files.length > 3) {
                 $(".text-danger").removeClass("hidden");
                 $(".text-danger").html("You can upload only 3 images")
             } else {
-                $(".text-danger").addClass("hidden");
+                if (input.files.length < 3) {
+                    $(".text-danger").removeClass("hidden");
+                    $(".text-danger").html("You need upload 3 images")
+                } else {
+                    $(".text-danger").addClass("hidden");
+                }
                 for (let i = 0; i < input.files.length; i++) {
                     let file = input.files[i];
                     let reader = new FileReader();
@@ -72,14 +79,24 @@
                                 data: {"data": e.target.result, csrfmiddlewaretoken: '{{ csrf_token }}'},
                                 success: function (data) {
                                     if (data.face && !error) {
-                                        html += '<div><img width="200" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
+                                        html += '<div><img width="200" class="upload_img" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
                                         $(input).parent().removeClass('dragover');
                                         $(input).parent().parent().find('.preview-zone').removeClass('hidden');
                                         $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body').empty().append(html);
-                                        $(".btn-primary").prop('disabled', ($(".upload_image_card").length != 3));
+                                        if ($(".upload_img").length === 3) {
+                                            $.ajax({
+                                                type: "POST",
+                                                url: "{% url "index" %}",
+                                                data: {
+                                                    "data": html,
+                                                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                                                }, success: function (data) {
+                                                    console.log($(".upload_img"));
+                                                    window.location.replace("/album/" + data.album_id);
+                                                }
+                                            })
+                                        }
                                     } else {
-                                        $(input).parent().addClass('dragover');
-                                        $(input).parent().parent().find('.preview-zone').addClass('hidden');
                                         $(".text-danger").removeClass("hidden");
                                         $(".text-danger").html('On image "' + file.name + '" no face');
                                     }
@@ -91,5 +108,17 @@
                 }
             }
         }
+
+        $('.remove-preview').on('click', function () {
+            $(".text-danger").addClass("hidden");
+            var boxZone = $(this).parents('.preview-zone').find('.box-body');
+            var previewZone = $(this).parents('.preview-zone');
+            var dropzone = $(this).parents('.form-group').find('.dropzone');
+            boxZone.empty();
+            previewZone.addClass('hidden');
+            reset(dropzone);
+            html = '';
+        });
     </script>
+
 {% endblock %}

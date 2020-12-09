@@ -8,6 +8,7 @@ $(".dropzone").change(function () {
 });
 
 $('.dropzone-wrapper').on('dragover', function (e) {
+
     e.preventDefault();
     e.stopPropagation();
     $(this).addClass('dragover');
@@ -19,11 +20,3 @@ $('.dropzone-wrapper').on('dragleave', function (e) {
     $(this).removeClass('dragover');
 });
 
-$('.remove-preview').on('click', function () {
-    var boxZone = $(this).parents('.preview-zone').find('.box-body');
-    var previewZone = $(this).parents('.preview-zone');
-    var dropzone = $(this).parents('.form-group').find('.dropzone');
-    boxZone.empty();
-    previewZone.addClass('hidden');
-    reset(dropzone);
-});

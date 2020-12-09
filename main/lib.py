@@ -1,4 +1,6 @@
-from io import BytesIO
+import io
+from time import sleep
+
 from PIL import Image
 from PIL.ImageFilter import BoxBlur
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -20,7 +22,8 @@ def magic_with_image(file, p=600):
     bg_w, bg_h = blurred.size
     blurred.paste(img, ((bg_w - img_w) // 2, (bg_h - img_h) // 2))
 
-    pic_io = BytesIO()
+    pic_io = io.BytesIO()
+    pic_io.seek(0)
     blurred.save(pic_io, "JPEG")
-    return InMemoryUploadedFile(file=pic_io, field_name=None, name=str(file), content_type='image/jpeg', size=(p, p),
+    return InMemoryUploadedFile(file=pic_io, field_name=None, name=str(img), content_type='image/jpeg', size=(p, p),
                                 charset=None)
