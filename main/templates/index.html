@@ -3,18 +3,20 @@
 
 {% block main %}
     <section>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="{% url "index" %}" method="POST" enctype="multipart/form-data">
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label class="control-label">Upload File</label>
+                            <label class="control-label">Upload File</label><br>
+                            <label class="label-danger"><p class="text-danger hidden">You can upload only 3 images</p>
+                            </label>
                             <div class="preview-zone hidden">
                                 <div class="box box-solid">
                                     <div class="box-header with-border">
                                         <div><b>Preview</b></div>
                                         <div class="box-tools pull-right">
-                                            <button type="button" class="btn btn-danger btn-xs remove-preview">
+                                            <button type="button" class="btn btn-secondary remove-preview">
                                                 <i class="fa fa-times"></i> Reset The Field
                                             </button>
                                         </div>
@@ -27,7 +29,7 @@
                                     <i class="glyphicon glyphicon-download-alt"></i>
                                     <p>Choose an image file or drag it here.</p>
                                 </div>
-                                <input type="file" name="img_logo" class="dropzone">
+                                <input type="file" name="img_logo" class="dropzone" multiple>
                             </div>
                         </div>
                     </div>
@@ -44,5 +46,45 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://webdevtrick.com/demos/drag-and-drop-upload/function.js"></script>
+    <script src="{% static "js/webdevtrick.js" %}"></script>
+    <script>
+        function readFile(input) {
+            let html = "";
+            let error = false;
+            if (input.files.length !== 3) {
+                $(".text-danger").removeClass("hidden");
+                $(".text-danger").html("You can upload only 3 images")
+            } else {
+                $(".text-danger").addClass("hidden");
+                for (let i = 0; i < input.files.length; i++) {
+                    let file = input.files[i];
+                    let reader = new FileReader();
+                    reader.onload = (function (file) {
+                        return function (e) {
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url "is_face" %}",
+                                data: {"data": e.target.result, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                                success: function (data) {
+                                    if (data.face && !error) {
+                                        html += '<div class="upload_image_card"><img width="200" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
+                                        $(input).parent().removeClass('dragover');
+                                        $(input).parent().parent().find('.preview-zone').removeClass('hidden');
+                                        $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body').empty().append(html);
+                                    } else {
+                                        $(input).parent().addClass('dragover');
+                                        $(input).parent().parent().find('.preview-zone').addClass('hidden');
+
+                                        $(".text-danger").removeClass("hidden");
+                                        $(".text-danger").html('On image "' + file.name + '" no face');
+                                    }
+                                }
+                            });
+                        };
+                    })(file);
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+    </script>
 {% endblock %}

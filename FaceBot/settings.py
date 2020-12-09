@@ -73,8 +73,12 @@ WSGI_APPLICATION = 'FaceBot.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'facebot',
+        'USER': 'facebot',
+        'PASSWORD': os.environ.get("FACEBOT_DB_PASS", ""),
+        'HOST': '90.188.90.101',
+        'PORT': '5002',
     }
 }
 
@@ -114,3 +118,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "main/static/css/styles.css")
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
