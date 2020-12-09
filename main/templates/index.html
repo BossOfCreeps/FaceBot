@@ -24,7 +24,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="box-body"></div>
+                                    <div class="box-body upload_image_card"></div>
                                 </div>
                             </div>
                             <div class="dropzone-wrapper">
@@ -72,7 +72,7 @@
                                 data: {"data": e.target.result, csrfmiddlewaretoken: '{{ csrf_token }}'},
                                 success: function (data) {
                                     if (data.face && !error) {
-                                        html += '<div class="upload_image_card"><img width="200" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
+                                        html += '<div><img width="200" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
                                         $(input).parent().removeClass('dragover');
                                         $(input).parent().parent().find('.preview-zone').removeClass('hidden');
                                         $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body').empty().append(html);
