@@ -1,4 +1,7 @@
+{% load custom_tags %}
 {% load static %}
+{% load custom_tags %}
+{% nav_albums as albums_ %}
 
 <!doctype html>
 <html lang="en">
@@ -12,6 +15,7 @@
     <link rel="stylesheet" href="{% static "css/styles.css" %}">
     <link rel="shortcut icon" href="{% static "img/favicon.png" %}" type="image/png">
     <title>{% block title %}{% endblock %}</title>
+    {% block head %}{% endblock %}
 </head>
 <body>
 <header>
@@ -26,8 +30,18 @@
                     <li class="nav-item {% if request.path == "/" %} active {% endif %}">
                         <a class="nav-link" href="{% url "index" %}">Home</a>
                     </li>
-                    <li class="nav-item {% if request.path|slice:":7" == "/album/" %} active {% endif %}">
-                        <a class="nav-link" href="{% url "albums" %}">Albums</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.path == "/album/" %} active {% endif %}"
+                           id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                           href="{% url "albums" %}">Albums</a>
+                        {% if albums_ %}
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                {% for album_ in albums_ %}
+                                    <a class="dropdown-item"
+                                       href="{% url "photos" album_.id %}">{{ album_.datetime|date:"H:i d/m/Y" }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </li>
                 </ul>
             </div>
@@ -43,5 +57,14 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.0/dist/js/bootstrap.bundle.min.js"></script>
 {% block scripts %}{% endblock %}
+<script>
+    $('.dropdown-toggle').click(function (e) {
+        if ($(document).width() < 768) {
+            $(".dropdown-menu").addClass("hidden")
+        }
+        e.preventDefault();
+        window.location.href = $(this).attr('href');
+    });
+</script>
 </body>
 </html>

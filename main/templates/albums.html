@@ -7,4 +7,5 @@
     {% for album in albums %}
         <a href="{% url "photos" album.id %}">{{ album }}</a><br>
     {% endfor %}
+
 {% endblock %}
