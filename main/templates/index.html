@@ -3,96 +3,100 @@
 
 {% block title %}Homepage{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+{% endblock %}
 {% block main %}
-    <section>
-        <form action="{% url "index" %}" method="POST" enctype="multipart/form-data" id="upload_form">
-            {% csrf_token %}
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="label-danger">
-                                <p class="text-danger hidden">You can upload only 3 images</p>
-                            </label>
-                            <div class="preview-zone hidden">
-                                <div class="box box-solid">
-                                    <div class="box-header with-border">
-                                        <div><b>Preview</b></div>
-                                        <div class="box-tools pull-right">
-                                            <button type="button" class="btn btn-secondary remove-preview">
-                                                <i class="fa fa-times"></i> Reset The Field
-                                            </button>
-                                        </div>
+    <div id="upload_form">
+        {% csrf_token %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="label-danger">
+                            <p class="text-danger hidden">You can upload only 3 images</p>
+                        </label>
+                        <div class="preview-zone hidden">
+                            <div class="box box-solid">
+                                <div class="box-header with-border">
+                                    <div><b>Preview</b></div>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-secondary remove-preview">
+                                            <i class="fa fa-times"></i> Reset The Field
+                                        </button>
                                     </div>
-                                    <div class="box-body upload_image_card"></div>
                                 </div>
-                            </div>
-                            <div class="dropzone-wrapper">
-                                <div class="dropzone-desc">
-                                    <i class="glyphicon glyphicon-download-alt"></i>
-                                    <p>Choose an image file or drag it here.</p>
-                                </div>
-                                <input type="file" name="img_logo" class="dropzone" accept=image/* multiple>
+                                <div class="box-body upload_image_card"></div>
                             </div>
                         </div>
+                        <div class="dropzone-wrapper">
+                            <div class="dropzone-desc">
+                                <i class="glyphicon glyphicon-download-alt"></i>
+                                <p>Choose an image file or drag it here.</p>
+                            </div>
+                            <input type="file" name="img_logo" class="dropzone" accept=image/* multiple>
+                        </div>
+                        <button class="btn btn-primary" id="upload_btn" disabled onclick="upload()"><i
+                                class="fa fa-upload"></i> Upload
+                        </button>
                     </div>
                 </div>
             </div>
-        </form>
-    </section>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <script src="{% static "js/webdevtrick.js" %}"></script>
     <script>
-        let html = "";
+        let html = {};
+        let counter = 0;
 
         function readFile(input) {
-            //alert(html);
-            let error = false;
             if (input.files.length > 3) {
                 $(".text-danger").removeClass("hidden");
                 $(".text-danger").html("You can upload only 3 images")
             } else {
-                if (input.files.length < 3) {
-                    $(".text-danger").removeClass("hidden");
-                    $(".text-danger").html("You need upload 3 images")
-                } else {
-                    $(".text-danger").addClass("hidden");
-                }
                 for (let i = 0; i < input.files.length; i++) {
                     let file = input.files[i];
                     let reader = new FileReader();
                     reader.onload = (function (file) {
                         return function (e) {
-                            $.ajax({
-                                type: "POST",
-                                url: "{% url "is_face" %}",
-                                data: {"data": e.target.result, csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                success: function (data) {
-                                    if (data.face && !error) {
-                                        html += '<div><img width="200" class="upload_img" src="' + e.target.result + '"/>' + '<p>' + file.name + '</p></div>';
-                                        $(input).parent().removeClass('dragover');
-                                        $(input).parent().parent().find('.preview-zone').removeClass('hidden');
-                                        $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body').empty().append(html);
-                                        if ($(".upload_img").length === 3) {
-                                            $.ajax({
-                                                type: "POST",
-                                                url: "{% url "index" %}",
-                                                data: {
-                                                    "data": html,
-                                                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                                                }, success: function (data) {
-                                                    console.log($(".upload_img"));
-                                                    window.location.replace("/album/" + data.album_id);
-                                                }
-                                            })
+                            EXIF.getData(file, function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url "is_face" %}",
+                                    data: {
+                                        "data": e.target.result,
+                                        "orient": EXIF.getTag(this, "Orientation") || 0,
+                                        "csrfmiddlewaretoken": '{{ csrf_token }}'
+                                    },
+                                    success: function (data) {
+                                        if (data.state) {
+                                            counter += 1;
+                                            html[counter] = '<div class="upload_img" id="' + counter + '">' +
+                                                '<button type="button" class="close" aria-label="Close">' +
+                                                '<i class="fas fa-times" onclick="del_photo(' + counter + ');"></i>' +
+                                                '</button>' +
+                                                '<img width="200"  id="' + EXIF.getTag(file, "Orientation") +
+                                                '" src="' + data.text + '" src1="' + e.target.result + '"/>' +
+                                                '<p>' + file.name + '</p>' +
+                                                '</div>';
+                                            console.log(html);
+                                            let html_ = Object.keys(html).map(function (key) {
+                                                return html[key];
+                                            });
+                                            $(input).parent().removeClass('dragover');
+                                            $(input).parent().parent().find('.preview-zone').removeClass('hidden');
+                                            $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body').empty().append(html_);
+                                            $("#upload_btn").attr("disabled", ($(".upload_img").length !== 3))
+                                        } else {
+                                            $(".text-danger").removeClass("hidden");
+                                            $(".text-danger").html(data.text + file.name);
                                         }
-                                    } else {
-                                        $(".text-danger").removeClass("hidden");
-                                        $(".text-danger").html('On image "' + file.name + '" no face');
                                     }
-                                }
+                                });
                             });
                         };
                     })(file);
@@ -101,16 +105,51 @@
             }
         }
 
+        function upload() {
+            let html_ = "";
+            Object.keys(html).map(function (key) {
+                html_ += html[key];
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "{% url "index" %}",
+                data: {
+                    "data": html_,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, success: function (data) {
+                    window.location.replace("/album/" + data.album_id);
+                }
+            })
+        }
+
+        function del_photo(a) {
+            delete html[a];
+            let html_ = Object.keys(html).map(function (key) {
+                return html[key];
+            });
+            $("#upload_btn").attr("disabled", (html_.length !== 3))
+
+            if (html_.length === 0) {
+                remove_preview();
+            }
+            $('.preview-zone').find('.box').find('.box-body').empty().append(html_);
+
+        }
+
         $('.remove-preview').on('click', function () {
+            remove_preview();
+            html = {};
+        });
+
+        function remove_preview() {
             $(".text-danger").addClass("hidden");
-            var boxZone = $(this).parents('.preview-zone').find('.box-body');
-            var previewZone = $(this).parents('.preview-zone');
-            var dropzone = $(this).parents('.form-group').find('.dropzone');
+            var boxZone = $('.preview-zone').find('.box-body');
+            var previewZone = $('.preview-zone');
+            var dropzone = $('.form-group').find('.dropzone');
             boxZone.empty();
             previewZone.addClass('hidden');
             reset(dropzone);
-            html = '';
-        });
+        }
     </script>
-
 {% endblock %}

@@ -3,9 +3,136 @@
 
 {% block title %}Albums{% endblock %}
 
-{% block main %}
-    {% for album in albums %}
-        <a href="{% url "photos" album.id %}">{{ album }}</a><br>
-    {% endfor %}
+{% block head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css">
+    <link rel="stylesheet" href="http://kenwheeler.github.io/slick/slick/slick-theme.css">
+    <link rel="stylesheet" href="{% static "css/slick-slide.css" %}">
+{% endblock %}
 
+{% block main %}
+    <div class="row row-cols-1 row-cols-md-2 g-2" style="width: 70%; margin: auto;">
+        {% for album in albums %}
+            <div class="col">
+                <div class="card mb-1">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="slider_albums_photo slider_{{ album.id }}">
+                                {% for photo in album.photos.all %}
+                                    <div>
+                                        <img data-lazy="/media/{{ photo.photo }}" src="/media/{{ photo.photo }}"
+                                             width="100%">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ album.datetime|date:"d/m/Y H:i" }}</h5>
+                                <p class="card-text">
+                                    This is a wider card with supporting text below as a natural
+                                    lead-in to additional content. This content is a little bit longer.
+                                </p>
+                                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                    <input type="radio" class="btn-check" checked>
+                                    <label class="btn btn-outline-primary">
+                                        <a href="{% url "photos" album.id %}" >Open</a>
+                                    </label>
+                                    <input type="radio" class="btn-check">
+                                    <label class="btn btn-outline-secondary" onclick="open_modal({{ album.id }})">
+                                        <i class="far fa-edit"></i>
+                                    </label>
+                                    <input type="radio" class="btn-check">
+                                    <label class="btn btn-outline-danger" onclick="delete_album({{ album.id }});">
+                                        <i class="far fa-trash-alt"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url "edit_album" %}" id="datetime_form" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit datetime</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <input type="hidden" id="datetime_form_id" name="album_id" value="0">
+                        <input type="datetime-local" id="datetime_form_val" name="datetime" class="form-control"
+                               width="100%" min="2017-06-01T08:30" max="2020-06-30T16:30" required>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="datetime_form_but">
+                            Save changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.slider_albums_photo').slick({
+                dots: false,
+                infinite: true,
+                speed: 300,
+                slidesToShow: 1,
+                adaptiveHeight: true,
+            });
+        });
+
+
+        function slick(this_) {
+            if ($(this_).is(':hover')) {
+                $(this_).slick("slickNext");
+                setTimeout(slick, 1500, this_);
+            }
+        }
+
+        $(".slider_albums_photo").hover(function () {
+            slick(this);
+        });
+
+    </script>
+    <script>
+        function open_modal(album_id) {
+            $.ajax({
+                type: "POST",
+                url: "{% url "get_album_datetime" %}",
+                data: {
+                    "album_id": album_id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, success: function (data) {
+                    $("#datetime_form_id").val(album_id);
+                    $("#datetime_form_val").val(data.data);
+                    $("#edit_modal").modal("show");
+                }
+            })
+        }
+
+        function delete_album(album_id) {
+            $.ajax({
+                type: "POST",
+                url: "{% url "delete_album" %}",
+                data: {
+                    "album_id": album_id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, success: function (data) {
+                    window.location.replace("{% url "albums" %}");
+                }
+            })
+        }
+    </script>
 {% endblock %}

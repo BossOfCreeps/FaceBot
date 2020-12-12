@@ -22,7 +22,7 @@ main {
 }
 
 .upload_image_card div {
-    width: 200px;
+    width: 180px;
     display: inline-block;
     margin: auto;
     vertical-align: top;
@@ -35,12 +35,18 @@ main {
 
 .photos_carousel p {
     color: white;
-    text-shadow: 0 1px 0 rgb(0, 0, 0), 0 -1px 0 rgb(0, 0, 0), 1px 0 0 rgb(0, 0, 0), -1px 0 0 rgb(0, 0, 0), 1px 1px 0 rgb(0, 0, 0), 1px -1px 0 rgb(0, 0, 0), -1px 1px 0 rgb(0, 0, 0), -1px -1px 0 rgb(0, 0, 0);
+    text-shadow: 0 1px 0 rgb(0, 0, 0), 0 -1px 0 rgb(0, 0, 0), 1px 0 0 rgb(0, 0, 0), -1px 0 0 rgb(0, 0, 0), 1px 1px
+    0 rgb(0, 0, 0), 1px -1px 0 rgb(0, 0, 0), -1px 1px 0 rgb(0, 0, 0), -1px -1px 0 rgb(0, 0, 0);
 }
 
 .dropdown:hover .dropdown-menu {
     display: block;
     margin-top: 0;
+}
+
+.slider_albums_photo{
+    width: 100%;
+    margin: auto;
 }
 
 @media only screen and (max-width: 600px) {
@@ -51,4 +57,18 @@ main {
     .photos_carousel {
         width: 350px;
     }
+}
+
+.upload_img button i{
+    color: red;
+}
+
+
+#upload_btn{
+    margin-top: 10px;
+}
+
+.card-body a{
+    text-decoration: none;
+    color: white;
 }

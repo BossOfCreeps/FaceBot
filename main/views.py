@@ -1,5 +1,8 @@
 import base64
 import io
+from pprint import pprint
+
+from bs4 import BeautifulSoup
 
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -18,10 +21,15 @@ class Index(View):
         return render(request, "index.html")
 
     def post(self, request, *args, **kwargs):
+        html_ = request.POST["data"]
+
+        soup = BeautifulSoup(html_, 'lxml')
+
         album = Album.objects.create(user=request.user, datetime=now())
-        for val in request.POST["data"].split("data:image/jpeg;base64,")[1:]:
-            inmemory_file = io.BytesIO(base64.b64decode(val.split('"/><p>')[0].encode()))
-            Photo.objects.create(album=album, photo=magic_with_image(inmemory_file))
+        for img in soup.find_all("img"):
+            inmemory_file = io.BytesIO(base64.b64decode(img.get("src1")[23:].encode()))
+            orient = img.get("id")
+            Photo.objects.create(album=album, photo=magic_with_image(inmemory_file, orient))
         return JsonResponse({"album_id": album.id})
 
 
