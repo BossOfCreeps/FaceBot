@@ -3,12 +3,70 @@
 
 {% block title %}Albums{% endblock %}
 
+{% block head %}
+{% endblock %}
+
 {% block main %}
+
+    <div class="container">
+        <div style="margin: auto; width: 310px;">
+            <div class="border border-success rounded-circle shadow p-3 mb-5 bg-white rounded" id="circle"
+                    {% if album.age.age <= 10 %}
+                 style="background-image: url('/static/img/icons/age/0.png');"
+                    {% elif album.age.age <= 20 %}
+                 style="background-image: url('/static/img/icons/age/10.png');"
+                    {% elif album.age.age <= 30 %}
+                 style="background-image: url('/static/img/icons/age/20.png');"
+                    {% elif album.age.age <= 40 %}
+                 style="background-image: url('/static/img/icons/age/30.png');"
+                    {% elif album.age.age <= 50 %}
+                 style="background-image: url('/static/img/icons/age/40.png');"
+                    {% elif album.age.age <= 60 %}
+                 style="background-image: url('/static/img/icons/age/50.png');"
+                    {% elif album.age.age <= 70 %}
+                 style="background-image: url('/static/img/icons/age/60.png');"
+                    {% elif album.age.age <= 200 %}
+                 style="background-image: url('/static/img/icons/age/70.png');"
+                    {% endif %}
+            >
+                {% if album.age %}
+                    {{ album.age.age|floatformat:0 }}
+                {% else %}
+                    &#160
+                {% endif %}
+            </div>
+
+            <div class="border border-success rounded-circle shadow p-3 mb-5 bg-white rounded" id="circle"
+                 style="background-image: url('/static/img/icons/gender/{{ album.gender.gender|floatformat:0 }}.png');">
+                &#160
+            </div>
+
+            <div class="border border-success rounded-circle shadow p-3 mb-5 bg-white rounded" id="circle"
+                 style="background-image: url('/static/img/icons/age/0.png');">
+                {% if album.age %}
+                    {{ album.age.age|floatformat:0 }}
+                {% else %}
+                    &#160
+                {% endif %}
+            </div>
+        </div>
+        <div class="row my-2">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <canvas id="chBar" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div id="carouselExampleDark" class="carousel carousel-dark slide photos_carousel" data-bs-ride="carousel">
         <ol class="carousel-indicators">
             {% for photo in album.photos.all %}
                 <li data-bs-target="#carouselExampleDark" data-bs-slide-to="{{ forloop.counter0 }}"
-                    {% if forloop.first %}class="active">{% endif %}></li>
+                    {% if forloop.first %}class="active"{% endif %}/>
             {% endfor %}
         </ol>
         <div class="carousel-inner" height="600px">
@@ -17,12 +75,7 @@
                     <img src="/media/{{ photo.photo }}" class="d-block w-100" alt="...">
                     <div class="carousel-caption d-none d-md-block text_on_photo">
                         <p>
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
+                            {{ photo.age.age }}
                         </p>
                     </div>
                 </div>
@@ -37,4 +90,63 @@
             <span class="visually-hidden">Next</span>
         </a>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://www.chartjs.org/dist/2.9.4/Chart.min.js"></script>
+    <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+
+    <script>
+        {% for photo in album.photos.all %}
+            {% if not photo.age %}
+                $.ajax({
+                    type: "POST",
+                    url: "{% url "get_photo_NN" %}",
+                    data: {
+                        "photo_id": {{ photo.id }},
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    }, success: function (data) {
+                        window.location.reload();
+                    }
+                })
+            {% endif %}
+        {% endfor %}
+    </script>
+
+    <script>
+        // chart colors
+        var colors = ['#007bff', '#28a745', '#444444', '#c3e6cb', '#dc3545', '#6c757d'];
+
+        var chBar = document.getElementById("chBar");
+        var chartData = {
+            labels: [{% for key, val in album.age.items %}{% if key != "age" %}"{{ key }}", {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for key, val in album.age.items %}{% if key != "age" %}{{ val }}, {% endif %}{% endfor %}],
+                backgroundColor: colors[0]
+            }]
+        };
+
+        if (chBar) {
+            new Chart(chBar, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            barPercentage: 0.4,
+                            categoryPercentage: 0.5
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            });
+        }
+    </script>
 {% endblock %}

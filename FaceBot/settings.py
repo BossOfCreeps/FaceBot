@@ -24,18 +24,21 @@ SECRET_KEY = 'a%6c)kfp9plq!uk(k*d-n24!j#7n$u90l(6pi-h*0&e*m-n319'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["xn--80aqwg2a.xn--p1ai", "90.188.90.101", "127.0.0.1"]
 
 # Application definition
 
 INSTALLED_APPS = [
     'main',
+    'ajax',
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',  # Social Auth
             ],
             'libraries': {
                 'custom_tags': 'main.templatetags.custom_tags',
@@ -126,3 +130,27 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+# Email
+
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 2525
+EMAIL_HOST_USER = 'seva-ra4is@mail.ru'
+EMAIL_HOST_PASSWORD = os.environ.get("FACEBOT_EMAIL_PASS", "")
+EMAIL_USE_TLS = True
+
+# Custom user
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+# Social Auth
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.vk.VKOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = os.environ.get("VK_OAUTH2_KEY", "")
+SOCIAL_AUTH_VK_OAUTH2_SECRET = os.environ.get("VK_OAUTH2_SECRET", "")
+LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']

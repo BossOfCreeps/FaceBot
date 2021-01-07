@@ -35,8 +35,7 @@ main {
 
 .photos_carousel p {
     color: white;
-    text-shadow: 0 1px 0 rgb(0, 0, 0), 0 -1px 0 rgb(0, 0, 0), 1px 0 0 rgb(0, 0, 0), -1px 0 0 rgb(0, 0, 0), 1px 1px
-    0 rgb(0, 0, 0), 1px -1px 0 rgb(0, 0, 0), -1px 1px 0 rgb(0, 0, 0), -1px -1px 0 rgb(0, 0, 0);
+    text-shadow: 0 1px 0 rgb(0, 0, 0), 0 -1px 0 rgb(0, 0, 0), 1px 0 0 rgb(0, 0, 0), -1px 0 0 rgb(0, 0, 0), 1px 1px 0 rgb(0, 0, 0), 1px -1px 0 rgb(0, 0, 0), -1px 1px 0 rgb(0, 0, 0), -1px -1px 0 rgb(0, 0, 0);
 }
 
 .dropdown:hover .dropdown-menu {
@@ -44,7 +43,7 @@ main {
     margin-top: 0;
 }
 
-.slider_albums_photo{
+.slider_albums_photo {
     width: 100%;
     margin: auto;
 }
@@ -59,16 +58,26 @@ main {
     }
 }
 
-.upload_img button i{
+.upload_img button i {
     color: red;
 }
 
 
-#upload_btn{
+#upload_btn {
     margin-top: 10px;
 }
 
-.card-body a{
+.card-body a {
     text-decoration: none;
     color: white;
+}
+
+#circle {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    text-align: center;
+    background-size: 100%;
+    font-size: 50px;
+    text-shadow: 0 1px 0 rgb(255, 255, 255), 0 -1px 0 rgb(255, 255, 255), 1px 0 0 rgb(255, 255, 255), -1px 0 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), -1px -1px 0 rgb(255, 255, 255);
 }

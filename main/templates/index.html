@@ -7,43 +7,50 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 {% endblock %}
 {% block main %}
-    <div id="upload_form">
-        {% csrf_token %}
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label class="label-danger">
-                            <p class="text-danger hidden">You can upload only 3 images</p>
-                        </label>
-                        <div class="preview-zone hidden">
-                            <div class="box box-solid">
-                                <div class="box-header with-border">
-                                    <div><b>Preview</b></div>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-secondary remove-preview">
-                                            <i class="fa fa-times"></i> Reset The Field
-                                        </button>
+    {% if request.user.is_authenticated %}
+        <div id="upload_form">
+            {% csrf_token %}
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="label-danger">
+                                <p class="text-danger hidden">You can upload only 3 images</p>
+                            </label>
+                            <div class="preview-zone hidden">
+                                <div class="box box-solid">
+                                    <div class="box-header with-border">
+                                        <div><b>Preview</b></div>
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-secondary remove-preview">
+                                                <i class="fa fa-times"></i> Reset The Field
+                                            </button>
+                                        </div>
                                     </div>
+                                    <div class="box-body upload_image_card"></div>
                                 </div>
-                                <div class="box-body upload_image_card"></div>
                             </div>
-                        </div>
-                        <div class="dropzone-wrapper">
-                            <div class="dropzone-desc">
-                                <i class="glyphicon glyphicon-download-alt"></i>
-                                <p>Choose an image file or drag it here.</p>
+                            <div class="dropzone-wrapper">
+                                <div class="dropzone-desc">
+                                    <i class="glyphicon glyphicon-download-alt"></i>
+                                    <p>Choose an image file or drag it here.</p>
+                                </div>
+                                <input type="file" name="img_logo" class="dropzone" accept=image/* multiple>
                             </div>
-                            <input type="file" name="img_logo" class="dropzone" accept=image/* multiple>
+                            <button class="btn btn-primary" id="upload_btn" disabled onclick="upload()"><i
+                                    class="fa fa-upload"></i> Upload
+                            </button>
                         </div>
-                        <button class="btn btn-primary" id="upload_btn" disabled onclick="upload()"><i
-                                class="fa fa-upload"></i> Upload
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% else %}
+        <h1>АВТОРИЗУЙСЯ</h1>
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -54,6 +61,7 @@
         let counter = 0;
 
         function readFile(input) {
+            $(".spinner-border").removeClass("hidden");
             if (input.files.length > 3) {
                 $(".text-danger").removeClass("hidden");
                 $(".text-danger").html("You can upload only 3 images")
@@ -73,17 +81,17 @@
                                         "csrfmiddlewaretoken": '{{ csrf_token }}'
                                     },
                                     success: function (data) {
+                                        $(".spinner-border").addClass("hidden");
                                         if (data.state) {
                                             counter += 1;
                                             html[counter] = '<div class="upload_img" id="' + counter + '">' +
                                                 '<button type="button" class="close" aria-label="Close">' +
                                                 '<i class="fas fa-times" onclick="del_photo(' + counter + ');"></i>' +
                                                 '</button>' +
-                                                '<img width="200"  id="' + EXIF.getTag(file, "Orientation") +
+                                                '<img width="190"  id="' + EXIF.getTag(file, "Orientation") +
                                                 '" src="' + data.text + '" src1="' + e.target.result + '"/>' +
                                                 '<p>' + file.name + '</p>' +
                                                 '</div>';
-                                            console.log(html);
                                             let html_ = Object.keys(html).map(function (key) {
                                                 return html[key];
                                             });

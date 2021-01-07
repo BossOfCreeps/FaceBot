@@ -1,11 +1,7 @@
 import base64
 import io
-from pprint import pprint
 
 from bs4 import BeautifulSoup
-
-from django.contrib.auth import login
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.timezone import now
@@ -17,7 +13,6 @@ from main.models import Album, Photo
 
 class Index(View):
     def get(self, request, *args, **kwargs):
-        login(request, User.objects.first())
         return render(request, "index.html")
 
     def post(self, request, *args, **kwargs):
@@ -35,7 +30,7 @@ class Index(View):
 
 class Albums(View):
     def get(self, request, *args, **kwargs):
-        return render(request, "albums.html", {"albums": Album.objects.order_by("-datetime")})
+        return render(request, "albums.html", {"albums": Album.objects.filter(user=request.user).order_by("-datetime")})
 
 
 class Photos(View):
