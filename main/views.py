@@ -2,6 +2,7 @@ import base64
 import io
 
 from bs4 import BeautifulSoup
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.timezone import now
@@ -15,6 +16,7 @@ class Index(View):
     def get(self, request, *args, **kwargs):
         return render(request, "index.html")
 
+    @login_required
     def post(self, request, *args, **kwargs):
         html_ = request.POST["data"]
 
@@ -29,10 +31,12 @@ class Index(View):
 
 
 class Albums(View):
+    @login_required
     def get(self, request, *args, **kwargs):
         return render(request, "albums.html", {"albums": Album.objects.filter(user=request.user).order_by("-datetime")})
 
 
 class Photos(View):
+    @login_required
     def get(self, request, *args, **kwargs):
         return render(request, "photos.html", {"album": Album.objects.get(id=kwargs["album_id"])})

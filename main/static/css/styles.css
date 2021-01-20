@@ -81,3 +81,16 @@ main {
     font-size: 50px;
     text-shadow: 0 1px 0 rgb(255, 255, 255), 0 -1px 0 rgb(255, 255, 255), 1px 0 0 rgb(255, 255, 255), -1px 0 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), -1px -1px 0 rgb(255, 255, 255);
 }
+
+.btn-vk {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #4c75a3;
+    color: white;
+    border: #4c75a3 solid 1px;
+}
+
+.btn-vk:hover {
+    background-color: white;
+    color: #4c75a3;
+}
